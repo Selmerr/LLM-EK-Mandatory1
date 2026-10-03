@@ -1,0 +1,46 @@
+goal: create a web based application, that makes use of CRUD operations
+
+project:
+  repository_path: demo_repo
+  artifact_path: artifacts
+
+ollama_endpoints:
+  ollama_primary:
+    base_url: http://localhost:11434
+  ollama_secondary:
+    base_url: http://localhost:11435
+
+default_profile: qwen2_5_coder_3b
+
+model_profiles:
+  qwen2_5_coder_3b:
+    endpoint: ollama_primary
+    model: qwen2.5-coder:3b
+  qwen3_4b:
+    endpoint: ollama_primary
+    model: qwen3:4b
+  llama3_1_8b:
+    endpoint: ollama_secondary
+    model: llama3.1:8b
+
+roles:
+  architect:
+    temperature: 0.2
+  tech_lead:
+    temperature: 0.1
+  implementer_a:
+    temperature: 0.1
+  implementer_b:
+    temperature: 0.1
+  tester:
+    temperature: 0.0
+  documenter:
+    temperature: 0.2
+  deployment_validator:
+    temperature: 0.0
+
+controls:
+  ask_before_commands: true
+  ask_before_file_edits: true
+  require_diff_before_apply: true
+  commit_after_each_stage: false
