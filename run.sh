@@ -22,7 +22,7 @@ run_aider() {
         $files < /dev/null
 }
 
-while IFS='|' read -r role endpoint model files; do
+while IFS='|' read -r role endpoint model files read_files; do
     [[ -z "$role" || "$role" == \#* ]] && continue
 
     echo
