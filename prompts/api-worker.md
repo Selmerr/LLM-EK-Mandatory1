@@ -1,7 +1,5 @@
 You are implementation worker T002.
 
-Read the architecture, OpenAPI contract, and task plan.
-
 Implement only the Flask API layer.
 
 Implement:
@@ -9,9 +7,16 @@ Implement:
 - POST /notes
 - DELETE /notes/{id}
 
-Assume these storage functions exist:
-- list_notes()
-- create_note(title, content)
-- delete_note(id)
+The storage interface is provided by src/llm_man_1/storage.py.
 
-Do not modify storage files or documentation.
+Import these functions from llm_man_1.storage:
+- list_notes
+- create_note
+- delete_note
+
+Do NOT define or stub these functions yourself.
+
+Only modify:
+- src/llm_man_1/api.py
+
+Do not modify storage files, tests, or documentation.
