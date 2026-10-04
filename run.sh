@@ -19,13 +19,6 @@ while IFS='|' read -r role endpoint model files; do
     echo "Files:    $files"
     echo "========================================"
 
-    read -r -p "Run this worker? [y/N] " answer
-
-    if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
-        echo "Skipped $role"
-        continue
-    fi
-
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "prompts/$role.md" \
