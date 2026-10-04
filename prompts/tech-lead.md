@@ -9,24 +9,20 @@ Create docs/tasks.md.
 Only plan functionality defined in docs/openapi.yaml.
 Do not invent additional endpoints or requirements.
 
-Create at least two implementation tasks that can be worked on independently
-by separate coding workers.
+Create at least two implementation tasks.
 
 Each task must include:
 - task ID
-- scope
-- files affected
+- scope boundaries
 - dependencies
 - acceptance criteria
 
-Partition the work so workers modify different files.
+Partition the work so that at least two implementation workers can work
+independently.
 
 Suggested split:
-- one task for storage/persistence
-- one task for Flask API/routes
-
-Both tasks may depend on the architecture and API contract, but must not
-depend on each other.
+- storage/persistence
+- Flask API/routes
 
 Do not implement anything.
 Do not modify architecture or API files.
