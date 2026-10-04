@@ -32,4 +32,14 @@ The two implementation tasks must not depend on each other.
 They must be suitable for parallel execution.
 
 Do not invent authentication or other requirements not present in the architecture or API contract.
+The two implementation tasks must be executable in parallel.
+
+Neither task may depend on completion of the other.
+Their only shared dependencies are docs/architecture.md and docs/openapi.yaml.
+
+Use this agreed boundary between workers:
+- Storage worker implements list_notes(), create_note(title, content), delete_note(id)
+- API worker implements GET /notes, POST /notes, DELETE /notes/{id} against that interface.
+
+Do not invent PUT/update, authentication, or endpoints not present in docs/openapi.yaml.
 Keep the document concise.
