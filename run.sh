@@ -24,7 +24,6 @@ run_aider() {
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
-        --yes \
         --no-auto-commits \
         "${read_args[@]}" \
         $files < /dev/null
@@ -60,6 +59,12 @@ while IFS='|' read -r role endpoint model files read_files; do
             echo "ERROR: OpenAPI validation failed."
             exit 1
         fi
+    fi
+
+    if [[ "$role" == "tech-lead" ]]; then
+      extra_args=(--map-tokens 0)
+    else
+        extra_args=()
     fi
 
     echo
