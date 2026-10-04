@@ -26,4 +26,10 @@ Suggested split:
 
 Do not implement anything.
 Do not modify architecture or API files.
+Do not plan operations that are not defined in docs/openapi.yaml.
+
+The two implementation tasks must not depend on each other.
+They must be suitable for parallel execution.
+
+Do not invent authentication or other requirements not present in the architecture or API contract.
 Keep the document concise.
