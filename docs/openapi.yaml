@@ -9,30 +9,30 @@ paths:
       responses:
         '200':
           description: A JSON array of note objects.
-  /notes:
     post:
       description: Create a new note.
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-              content:
-                type: string
-          required: [title, content]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
       responses:
         '201':
           description: The created note object with id.
     delete:
+      description: Delete a note by its ID.
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
+          required: true
           schema:
             type: string
-          required: true
       responses:
         '204':
           description: Note deleted successfully.
