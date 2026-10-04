@@ -55,6 +55,12 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
         "prompts/$role.md" \
         "$read_files"
 
+    if [[ "$role" == "test-worker" ]]; then
+        echo
+        echo "== Running tests =="
+        uv run pytest
+    fi
+    
     if [[ "$role" == "api" ]]; then
         echo
         echo "== Validating OpenAPI spec =="
