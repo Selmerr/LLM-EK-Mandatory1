@@ -13,12 +13,20 @@ run_aider() {
     local model="$3"
     local files="$4"
     local message_file="$5"
+    local read_files="${6:-}"
+
+    local -a read_args=()
+
+    for f in $read_files; do
+        read_args+=(--read "$f")
+    done
 
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
         --yes \
         --no-auto-commits \
+        "${read_args[@]}" \
         $files < /dev/null
 }
 
@@ -31,62 +39,27 @@ while IFS='|' read -r role endpoint model files read_files; do
     echo "Endpoint: $endpoint"
     echo "Model:    $model"
     echo "Files:    $files"
+    echo "Read:     $read_files"
     echo "========================================"
 
-    run_aider "$role" "$endpoint" "$model" "$files" "prompts/$role.md"
+    run_aider \
+        "$role" \
+        "$endpoint" \
+        "$model" \
+        "$files" \
+        "prompts/$role.md" \
+        "$read_files"
 
-    # API gets deterministic validation + repair attempts
     if [[ "$role" == "api" ]]; then
-        max_attempts=3
-        attempt=1
+        echo
+        echo "== Validating OpenAPI spec =="
 
-        while true; do
-            echo
-            echo "== Validating OpenAPI spec =="
-
-            if validator_output=$(uv run openapi-spec-validator docs/openapi.yaml 2>&1); then
-                echo "OpenAPI validation PASSED."
-                break
-            fi
-
-            echo "OpenAPI validation FAILED:"
-            echo "$validator_output"
-
-            if (( attempt >= max_attempts )); then
-                echo "ERROR: API worker failed after $max_attempts attempts."
-                exit 1
-            fi
-
-            ((attempt++))
-
-            echo
-            echo "== Repair attempt $attempt/$max_attempts =="
-
-            repair_prompt=$(mktemp)
-
-            cat > "$repair_prompt" <<EOF
-The OpenAPI specification you produced failed deterministic validation.
-
-Validator output:
-
-$validator_output
-
-Fix docs/openapi.yaml so that it passes the validator.
-
-Requirements:
-- Keep GET /notes
-- Keep POST /notes
-- Keep DELETE /notes/{id}
-- Use valid OpenAPI 3 syntax
-- Path parameter id must be required
-- POST must use requestBody
-- Do not modify any other files
-EOF
-
-            run_aider "$role" "$endpoint" "$model" "$files" "$repair_prompt"
-
-            rm -f "$repair_prompt"
-        done
+        if uv run openapi-spec-validator docs/openapi.yaml; then
+            echo "OpenAPI validation PASSED."
+        else
+            echo "ERROR: OpenAPI validation failed."
+            exit 1
+        fi
     fi
 
     echo
