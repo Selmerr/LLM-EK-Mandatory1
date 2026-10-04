@@ -35,7 +35,7 @@ run_aider() {
         $files < /dev/null
 }
 
-while IFS='|' read -r role endpoint model files read_files; do
+while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; do
     [[ -z "$role" || "$role" == \#* ]] && continue
 
     echo
@@ -66,7 +66,7 @@ while IFS='|' read -r role endpoint model files read_files; do
             exit 1
         fi
     fi
-    
+
     echo
     echo "== Result: $role =="
 
