@@ -14,10 +14,4 @@ Assume these storage functions exist:
 - create_note(title, content)
 - delete_note(id)
 
-Write API tests.
-
-Only modify:
-- src/llm_man_1/api.py
-- tests/test_api.py
-
 Do not modify storage files or documentation.

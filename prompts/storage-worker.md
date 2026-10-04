@@ -10,10 +10,9 @@ Provide:
 - delete_note(id)
 
 Use SQLite.
-Write unit tests for the storage layer.
 
 Only modify:
 - src/llm_man_1/storage.py
-- tests/test_storage.py
 
+Do not create or modify tests.
 Do not modify API files or documentation.
