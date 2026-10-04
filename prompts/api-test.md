@@ -19,3 +19,8 @@ Use Flask's test client.
 Only modify tests/test_api.py.
 Do not modify production code or documentation.
 Keep the tests simple and compatible with pytest.
+Flask error responses should be tested by checking the HTTP status code.
+Do not expect Flask's test client to raise exceptions for normal 400/404 responses.
+
+When POST /notes creates a note, capture the response and obtain the created ID
+from that response before testing DELETE.
