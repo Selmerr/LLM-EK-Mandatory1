@@ -27,7 +27,6 @@ paths:
           description: The created note object with id.
   /notes/{id}:
     delete:
-      description: Delete a note by its ID.
       parameters:
         - name: id
           in: path
