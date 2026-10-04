@@ -22,7 +22,7 @@ run_aider() {
         read_args+=(--read "$f")
     done
 
-    if [[ "$role" == "tech-lead" ]]; then
+    if [[ "$role" == "tech-lead" || "$role" == "storage-test" || "$role" == "api-test" ]]; then
         extra_args+=(--map-tokens 0)
     fi
 
@@ -55,12 +55,12 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
         "prompts/$role.md" \
         "$read_files"
 
-    if [[ "$role" == "test-worker" ]]; then
+    if [[ "$role" == "api-test" ]]; then
         echo
         echo "== Running tests =="
         uv run pytest
     fi
-    
+
     if [[ "$role" == "api" ]]; then
         echo
         echo "== Validating OpenAPI spec =="
