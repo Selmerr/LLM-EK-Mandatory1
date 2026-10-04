@@ -25,11 +25,12 @@ paths:
       responses:
         '201':
           description: The created note object with id.
+  /notes/{id}:
     delete:
       description: Delete a note by its ID.
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: string
