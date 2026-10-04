@@ -16,15 +16,21 @@ run_aider() {
     local read_files="${6:-}"
 
     local -a read_args=()
+    local -a extra_args=()
 
     for f in $read_files; do
         read_args+=(--read "$f")
     done
 
+    if [[ "$role" == "tech-lead" ]]; then
+        extra_args+=(--map-tokens 0)
+    fi
+
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
         --no-auto-commits \
+        "${extra_args[@]}" \
         "${read_args[@]}" \
         $files < /dev/null
 }
@@ -60,13 +66,7 @@ while IFS='|' read -r role endpoint model files read_files; do
             exit 1
         fi
     fi
-
-    if [[ "$role" == "tech-lead" ]]; then
-      extra_args=(--map-tokens 0)
-    else
-        extra_args=()
-    fi
-
+    
     echo
     echo "== Result: $role =="
 
