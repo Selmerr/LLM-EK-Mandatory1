@@ -1,0 +1,38 @@
+openapi: 3.0.1
+info:
+  title: Notes API
+  version: 1.0.0
+paths:
+  /notes:
+    get:
+      description: Retrieve a list of all notes.
+      responses:
+        '200':
+          description: A JSON array of note objects.
+  /notes:
+    post:
+      description: Create a new note.
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              content:
+                type: string
+          required: [title, content]
+      responses:
+        '201':
+          description: The created note object with id.
+    delete:
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Note deleted successfully.
