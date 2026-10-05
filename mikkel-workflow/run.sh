@@ -33,19 +33,12 @@ run_aider() {
         read_args+=(--read "$f")
     done
 
-    if [[ "$role" == "tech-lead" ||
-          "$role" == "storage-worker" ||
-          "$role" == "storage-test" ||
-          "$role" == "api-test" ]]; then
-        extra_args+=(--map-tokens 0)
-    fi
+    extra_args+=(--map-tokens 0)
 
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
-        --no-gitignore \
-        --no-auto-commits \
-        --subtree-only \
+        --no-git \
         "${extra_args[@]}" \
         "${read_args[@]}" \
         $files < /dev/null
