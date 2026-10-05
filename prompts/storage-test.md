@@ -17,3 +17,10 @@ Rules:
 
 Only modify tests/test_storage.py.
 Do not modify production code or documentation.
+Use pytest's monkeypatch and tmp_path to temporarily replace
+llm_man_1.storage.DB_NAME with a temporary database path.
+
+Do not create a separate SQLite connection that the production functions do not use.
+
+When testing deletion, use the ID returned by create_note().
+Do not hard-code IDs.
