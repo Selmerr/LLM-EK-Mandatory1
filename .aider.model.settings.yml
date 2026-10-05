@@ -1,0 +1,3 @@
+- name: ollama_chat/granite4.1:3b
+  extra_params:
+    num_ctx: 16384
