@@ -59,22 +59,33 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
         "prompts/$role.md" \
         "$read_files"
 
-    if [[ "$role" == "api-test" ]]; then
-        echo
-        echo "== Running tests =="
-        mkdir -p artifacts
+if [[ "$role" == "api-test" ]]; then
+    mkdir -p artifacts
 
-        set +e
-        uv run pytest 2>&1 | tee artifacts/pytest.txt
-        pytest_status=${PIPESTATUS[0]}
-        set -e
+    echo
+    echo "== Running tests =="
 
-        echo "Pytest exit code: $pytest_status"
+    set +e
+    uv run pytest 2>&1 | tee artifacts/pytest.txt
+    pytest_status=${PIPESTATUS[0]}
+    echo "Pytest exit code: $pytest_status" >> artifacts/pytest.txt
 
-        if [[ $pytest_status -ne 0 ]]; then
-            echo "WARNING: Some tests failed. Continuing to quality reporting."
-        fi    
+    echo
+    echo "== Running static checks =="
+
+    uv run ruff check src tests 2>&1 | tee artifacts/ruff.txt
+    ruff_status=${PIPESTATUS[0]}
+    echo "Ruff exit code: $ruff_status" >> artifacts/ruff.txt
+    set -e
+
+    if [[ $pytest_status -ne 0 ]]; then
+        echo "WARNING: Some tests failed. Continuing to quality reporting."
     fi
+
+    if [[ $ruff_status -ne 0 ]]; then
+        echo "WARNING: Ruff found static-check issues. Continuing to quality reporting."
+    fi
+fi
 
     if [[ "$role" == "api" ]]; then
         echo
