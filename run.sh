@@ -24,13 +24,13 @@ run_aider() {
         read_args+=(--read "$f")
     done
 
-    if [[ "$role" == "tech-lead" ||
-        "$role" == "storage-worker" ||
-        "$role" == "storage-test" ||
-        "$role" == "api-test" ||
-        "$role" == "quality" ]]; then
-        extra_args+=(--map-tokens 0)
-    fi
+if [[ "$role" == "tech-lead" ||
+      "$role" == "storage-worker" ||
+      "$role" == "storage-test" ||
+      "$role" == "api-test" ||
+      "$role" == "deployment" ]]; then
+    extra_args+=(--map-tokens 0)
+fi
 
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
