@@ -58,7 +58,18 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
     if [[ "$role" == "api-test" ]]; then
         echo
         echo "== Running tests =="
-        uv run pytest
+        mkdir -p artifacts
+
+        set +e
+        uv run pytest 2>&1 | tee artifacts/pytest.txt
+        pytest_status=${PIPESTATUS[0]}
+        set -e
+
+        echo "Pytest exit code: $pytest_status"
+
+        if [[ $pytest_status -ne 0 ]]; then
+            echo "WARNING: Some tests failed. Continuing to quality reporting."
+        fi    
     fi
 
     if [[ "$role" == "api" ]]; then

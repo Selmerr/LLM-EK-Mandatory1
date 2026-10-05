@@ -13,6 +13,8 @@ def get_conn():
             content TEXT NOT NULL
         )
     ''')
+    # Configure row_factory to sqlite3.Row for dictionary access
+    conn.row_factory = sqlite3.Row
     return conn
 
 def list_notes():
@@ -20,7 +22,7 @@ def list_notes():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM notes")
     rows = cursor.fetchall()
-    # Convert sqlite3.Row objects to dicts for easier handling
+    # Convert sqlite3.Row objects to dicts containing id, title, and content
     notes = [dict(row) for row in rows]
     conn.close()
     return notes
