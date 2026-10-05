@@ -238,12 +238,112 @@ validate_deployment() {
     return "$status"
 }
 
+stage_for_role() {
+    local role="$1"
 
+    case "$role" in
+        architect|api|tech-lead)
+            echo "planning"
+            ;;
+
+        storage-worker|api-worker)
+            echo "implementation"
+            ;;
+
+        storage-test|api-test|quality)
+            echo "verification"
+            ;;
+
+        deployment)
+            echo "deployment"
+            ;;
+
+        documentation)
+            echo "documentation"
+            ;;
+
+        *)
+            echo "$role"
+            ;;
+    esac
+}
+
+
+approve_stage() {
+    local stage="$1"
+
+    echo
+    echo "========================================"
+    echo "NEXT STAGE: $stage"
+    echo "========================================"
+
+    case "$stage" in
+        planning)
+            echo "Roles:"
+            echo "  architect"
+            echo "  api"
+            echo "  tech-lead"
+            echo
+            echo "This stage creates the architecture,"
+            echo "OpenAPI contract, and implementation plan."
+            ;;
+
+        implementation)
+            echo "Roles:"
+            echo "  storage-worker"
+            echo "  api-worker"
+            echo
+            echo "This stage modifies application source code."
+            ;;
+
+        verification)
+            echo "Roles:"
+            echo "  storage-test"
+            echo "  api-test"
+            echo "  quality"
+            echo
+            echo "This stage creates tests, runs pytest,"
+            echo "and produces the quality report."
+            ;;
+
+        deployment)
+            echo "Roles:"
+            echo "  deployment"
+            echo
+            echo "This stage generates a Dockerfile and"
+            echo "builds/runs the container for validation."
+            ;;
+
+        documentation)
+            echo "Roles:"
+            echo "  documentation"
+            echo
+            echo "This stage generates the final README."
+            ;;
+    esac
+
+    echo
+    echo "Review the output and diffs from the previous stage above."
+
+    read -r -p "Approve '$stage' stage? [y/N] " answer < /dev/tty
+    if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
+        echo "Workflow stopped before '$stage'."
+        exit 0
+    fi
+}
+
+previous_stage=""
 while IFS='|' read -r role endpoint model files read_files \
     || [[ -n "$role" ]]; do
 
     [[ -z "$role" || "$role" == \#* ]] && continue
 
+    current_stage="$(stage_for_role "$role")"
+
+    if [[ "$current_stage" != "$previous_stage" ]]; then
+        approve_stage "$current_stage"
+        previous_stage="$current_stage"
+    fi
     echo
     echo "========================================"
     echo "Role:     $role"
@@ -376,19 +476,24 @@ EOF
         fi
     done
 
-    git status --short
+git status --short
 
-    echo
-    echo "== Git diff =="
+echo
+echo "== Git diff =="
 
-    git --no-pager diff -- $files
-
-    echo
-    echo "== Git diff check =="
-
-    if ! git --no-pager diff --check; then
-        echo \
-            "WARNING: Git diff check found formatting issues."
+for f in $files; do
+    if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+        git --no-pager diff -- "$f"
+    elif [[ -f "$f" ]]; then
+        git --no-pager diff --no-index /dev/null "$f" || true
     fi
+done
+
+echo
+echo "== Git diff check =="
+
+if ! git --no-pager diff --check; then
+    echo "WARNING: Git diff check found formatting issues."
+fi
 
 done < roles.conf
