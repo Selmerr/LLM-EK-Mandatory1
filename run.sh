@@ -25,7 +25,8 @@ run_aider() {
     if [[ "$role" == "tech-lead" ||
         "$role" == "storage-worker" ||
         "$role" == "storage-test" ||
-        "$role" == "api-test" ]]; then
+        "$role" == "api-test" ||
+        "$role" == "quality" ]]; then
         extra_args+=(--map-tokens 0)
     fi
 

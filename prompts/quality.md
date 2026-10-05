@@ -1,25 +1,16 @@
-You are the quality reporting worker.
+Read the final pytest summary literally.
 
-Read:
-- artifacts/pytest.txt
+Do not calculate or infer test counts.
+Copy the total, passed, and failed counts directly from the pytest output.
 
-Create:
-- docs/quality.md
+For example, if pytest says:
+"3 failed, 5 passed"
+then report exactly:
+Total: 8
+Passed: 5
+Failed: 3
 
-Summarize the actual test run only. Do not invent results.
-
-The report must include:
-- test summary
-- number of passed tests
-- number of failed tests
-- important failure causes
-- known limitations and risks
-- whether the current implementation is ready for further validation
-
-If failures are caused by bad tests rather than production code, say so clearly.
-If failures indicate implementation defects, say so clearly.
-
-Do not modify source code.
-Do not modify tests.
-Do not attempt to fix anything.
-Keep the report concise and factual.
+Do not classify a failure as an implementation defect unless the traceback
+shows production code is incorrect.
+If the test calls a function with arguments that the function does not accept,
+describe this as a test/implementation interface mismatch.
