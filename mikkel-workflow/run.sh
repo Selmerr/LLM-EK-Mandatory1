@@ -2,11 +2,18 @@
 set -euo pipefail
 
 
-if [[ -n "$(git status --porcelain)" ]]; then
-    echo "ERROR: Working tree is not clean."
-    git status --short
+# Always run relative to the directory containing this script.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+
+# Only require THIS workflow folder to be clean.
+if [[ -n "$(git status --porcelain -- .)" ]]; then
+    echo "ERROR: Working tree for this workflow is not clean."
+    git status --short -- .
     exit 1
 fi
+
 
 mkdir -p artifacts
 
@@ -37,6 +44,7 @@ run_aider() {
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
         --no-auto-commits \
+        --subtree-only \
         "${extra_args[@]}" \
         "${read_args[@]}" \
         $files < /dev/null
@@ -128,7 +136,6 @@ read_files = os.environ["DIRECT_READ_FILES"].split()
 strip_outer_fence = os.environ["DIRECT_STRIP_FENCE"] == "true"
 
 prompt = prompt_file.read_text(encoding="utf-8")
-
 parts = [prompt]
 
 for filename in read_files:
@@ -178,7 +185,7 @@ if not text:
     )
 
 # Remove one outer Markdown fence if the model wrapped
-# the whole generated file in one.
+# the complete generated file in one.
 if strip_outer_fence:
     lines = text.splitlines()
 
@@ -222,6 +229,7 @@ validate_deployment() {
     for _ in {1..10}; do
         if curl -fsS \
             http://127.0.0.1:5050/notes; then
+
             status=0
             break
         fi
@@ -237,6 +245,7 @@ validate_deployment() {
 
     return "$status"
 }
+
 
 stage_for_role() {
     local role="$1"
@@ -325,29 +334,39 @@ approve_stage() {
     if [[ -n "$previous_stage" ]]; then
         echo
 
-        if [[ -z "$(git status --porcelain)" ]]; then
-            echo "No uncommitted changes from the previous stage."
+        if [[ -z "$(git status --porcelain -- .)" ]]; then
+            echo "No uncommitted changes to review."
         else
-            echo "== Changes from previous stage =="
+            echo "== Current uncommitted changes =="
 
-            git status --short
+            git status --short -- .
 
             echo
-            git --no-pager diff
+            git --no-pager diff -- .
 
             while IFS= read -r f; do
-                git --no-pager diff --no-index /dev/null "$f" || true
-            done < <(git ls-files --others --exclude-standard)
+                git --no-pager diff \
+                    --no-index \
+                    /dev/null \
+                    "$f" || true
+            done < <(
+                git ls-files \
+                    --others \
+                    --exclude-standard \
+                    -- .
+            )
         fi
 
         echo
-        echo "Review the output and diffs from the previous stage above."
+        echo "Review the current changes before approving the next stage."
     else
         echo
         echo "No previous stage to review."
     fi
 
-    read -r -p "Approve '$stage' stage? [y/N] " answer < /dev/tty
+    read -r -p \
+        "Approve '$stage' stage? [y/N] " \
+        answer < /dev/tty
 
     if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
         echo "Workflow stopped before '$stage'."
@@ -355,7 +374,9 @@ approve_stage() {
     fi
 }
 
+
 previous_stage=""
+
 while IFS='|' read -r role endpoint model files read_files \
     || [[ -n "$role" ]]; do
 
@@ -367,6 +388,7 @@ while IFS='|' read -r role endpoint model files read_files \
         approve_stage "$current_stage"
         previous_stage="$current_stage"
     fi
+
     echo
     echo "========================================"
     echo "Role:     $role"
@@ -476,6 +498,7 @@ Docker image built successfully.
 Container started successfully.
 GET /notes responded successfully.
 EOF
+
         else
             echo \
                 "WARNING: Deployment validation FAILED. Continuing."
@@ -499,24 +522,33 @@ EOF
         fi
     done
 
-git status --short
+    git status --short -- .
 
-echo
-echo "== Git diff =="
+    echo
+    echo "== Git diff =="
 
-for f in $files; do
-    if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
-        git --no-pager diff -- "$f"
-    elif [[ -f "$f" ]]; then
-        git --no-pager diff --no-index /dev/null "$f" || true
+    for f in $files; do
+        if git ls-files \
+            --error-unmatch \
+            "$f" >/dev/null 2>&1; then
+
+            git --no-pager diff -- "$f"
+
+        elif [[ -f "$f" ]]; then
+
+            git --no-pager diff \
+                --no-index \
+                /dev/null \
+                "$f" || true
+        fi
+    done
+
+    echo
+    echo "== Git diff check =="
+
+    if ! git --no-pager diff --check -- .; then
+        echo \
+            "WARNING: Git diff check found formatting issues."
     fi
-done
-
-echo
-echo "== Git diff check =="
-
-if ! git --no-pager diff --check; then
-    echo "WARNING: Git diff check found formatting issues."
-fi
 
 done < roles.conf
