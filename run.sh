@@ -322,10 +322,33 @@ approve_stage() {
             ;;
     esac
 
-    echo
-    echo "Review the output and diffs from the previous stage above."
+    if [[ -n "$previous_stage" ]]; then
+        echo
+
+        if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No uncommitted changes from the previous stage."
+        else
+            echo "== Changes from previous stage =="
+
+            git status --short
+
+            echo
+            git --no-pager diff
+
+            while IFS= read -r f; do
+                git --no-pager diff --no-index /dev/null "$f" || true
+            done < <(git ls-files --others --exclude-standard)
+        fi
+
+        echo
+        echo "Review the output and diffs from the previous stage above."
+    else
+        echo
+        echo "No previous stage to review."
+    fi
 
     read -r -p "Approve '$stage' stage? [y/N] " answer < /dev/tty
+
     if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
         echo "Workflow stopped before '$stage'."
         exit 0
