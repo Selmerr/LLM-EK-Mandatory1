@@ -1,26 +1,30 @@
 You are the deployment worker.
 
-Read:
-- pyproject.toml
-- uv.lock
-- src/llm_man_1/api.py
-- docs/architecture.md
+Output ONLY a Dockerfile.
+No Markdown fences.
+No explanation.
 
-Create:
-- Dockerfile
+IMPORTANT:
+- This project uses uv.
+- uv.lock is NOT a requirements.txt file.
+- NEVER run "pip install -r uv.lock".
+- NEVER run "pip install -r requirements.txt".
+- Do not use pip to install project dependencies.
+- Use the exact Flask command specified below.
 
-Create a simple Docker image for the Notes Flask application.
+The Dockerfile must perform these steps IN THIS ORDER:
 
-Requirements:
-- Use Python 3.12 slim.
-- Install uv.
-- Copy pyproject.toml and uv.lock.
-- Install the project dependencies using uv.
-- Copy the application source code.
-- Expose port 5000.
-- Start the Flask application on 0.0.0.0:5000.
-- Use llm_man_1.api as the Flask application.
-- Keep the image simple and suitable for local validation.
+1. FROM python:3.12-slim
+2. WORKDIR /app
+3. RUN pip install --no-cache-dir uv
+4. COPY pyproject.toml uv.lock ./
+5. COPY src ./src
+6. RUN uv sync --frozen --no-dev
+7. EXPOSE 5000
+8. Start Flask using EXACTLY:
 
-Only modify Dockerfile.
-Do not modify application code, tests, or documentation.
+CMD ["uv", "run", "flask", "--app", "llm_man_1.api:app", "run", "--host=0.0.0.0", "--port=5000"]
+
+Do not invent additional installation commands.
+Do not use requirements.txt.
+Do not execute uv.lock.

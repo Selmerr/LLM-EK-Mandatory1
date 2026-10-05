@@ -1,56 +1,72 @@
 You are the documentation worker.
 
-Read:
+Generate ONLY README.md.
+Do not include commentary outside the README.
+Do not invent commands, features, URLs, or requirements.
+
+Use these facts exactly:
+
+Application:
+- Python Flask Notes API
+- SQLite persistence
+- API operations are ONLY:
+  - GET /notes
+  - POST /notes
+  - DELETE /notes/{id}
+- There is NO update endpoint.
+- There is NO authentication.
+
+Local setup command:
+uv sync
+
+Local run command:
+uv run flask --app llm_man_1.api:app run
+
+Test command:
+uv run pytest
+
+Docker build command:
+docker build -t notes-api .
+
+Docker run command:
+docker run --rm -p 5000:5000 notes-api
+
+For test results:
+- use only docs/quality.md
+
+For deployment status:
+- use only artifacts/deployment-summary.txt
+- if it says FAILED, report that it failed
+- do not invent a reason not contained in that file
+
+Use relative documentation links exactly:
 - docs/architecture.md
 - docs/openapi.yaml
 - docs/tasks.md
 - docs/quality.md
-- Dockerfile
-- artifacts/deployment.txt
 
-Create:
-- README.md
-
-Write concise developer and operator documentation for the Notes API.
-
-Include:
+Structure:
 
 # Notes API
 
 ## Overview
-Briefly describe the application and architecture.
 
 ## Requirements
-List the main local requirements.
 
 ## Running Locally
-Explain how to install dependencies and start the Flask application using uv.
 
 ## API Usage
-Document:
-- GET /notes
-- POST /notes
-- DELETE /notes/{id}
 
-Include short curl examples.
+### GET /notes
+
+### POST /notes
+
+### DELETE /notes/{id}
 
 ## Testing
-Explain how to run pytest.
-Summarize the latest quality result from docs/quality.md without inventing results.
 
 ## Docker
-Explain how to build and run the Docker image.
 
 ## Deployment Validation
-Summarize the result from artifacts/deployment.txt.
-Do not claim validation passed unless the log says it passed.
 
 ## Project Documentation
-Reference:
-- docs/architecture.md
-- docs/openapi.yaml
-- docs/tasks.md
-- docs/quality.md
-
-Only modify README.md.
-Keep the documentation concise and factual.

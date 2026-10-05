@@ -381,12 +381,12 @@ EOF
     echo
     echo "== Git diff =="
 
-    git diff -- $files
+    git --no-pager diff -- $files
 
     echo
     echo "== Git diff check =="
 
-    if ! git diff --check; then
+    if ! git --no-pager diff --check; then
         echo \
             "WARNING: Git diff check found formatting issues."
     fi
