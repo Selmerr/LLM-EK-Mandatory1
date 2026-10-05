@@ -91,6 +91,38 @@ print(report)
 PY
 }
 
+validate_deployment() {
+    local image="llm-man-1-validation"
+    local container="llm-man-1-validation"
+
+    docker rm -f "$container" >/dev/null 2>&1 || true
+
+    docker build -t "$image" . || return 1
+
+    docker run -d \
+        --name "$container" \
+        -p 127.0.0.1:5050:5000 \
+        "$image" || return 1
+
+    local status=1
+
+    for _ in {1..10}; do
+        if curl -fsS http://127.0.0.1:5050/notes; then
+            status=0
+            break
+        fi
+
+        sleep 1
+    done
+
+    echo
+    docker logs "$container"
+
+    docker rm -f "$container" >/dev/null 2>&1 || true
+
+    return "$status"
+}
+
 while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; do
     [[ -z "$role" || "$role" == \#* ]] && continue
 
@@ -130,6 +162,21 @@ fi
             echo "WARNING: Some tests failed. Continuing to quality reporting."
         fi    
     fi
+    if [[ "$role" == "deployment" ]]; then
+    echo
+    echo "== Validating deployment =="
+
+    set +e
+    validate_deployment 2>&1 | tee artifacts/deployment.txt
+    deployment_status=${PIPESTATUS[0]}
+    set -e
+
+    if [[ $deployment_status -eq 0 ]]; then
+        echo "Deployment validation PASSED."
+    else
+        echo "WARNING: Deployment validation FAILED. Continuing."
+    fi
+fi
 
 if [[ "$role" == "api" ]]; then
 echo
