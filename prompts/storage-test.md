@@ -7,19 +7,13 @@ Read:
 Create:
 - tests/test_storage.py
 
-Test:
-- list_notes()
-- create_note(title, content)
-- delete_note(id)
-- deletion of a non-existent note
+Rules:
+- Import storage functions from llm_man_1.storage.
+- Do not assume return values that the implementation does not provide.
+- Do not create a fake database fixture unless the production code can actually use it.
+- Create test data explicitly when needed.
+- Verify delete_note() by checking that the note is gone afterwards.
+- Keep tests compatible with pytest.
 
 Only modify tests/test_storage.py.
 Do not modify production code or documentation.
-Keep the tests simple and compatible with pytest.
-Do not assume the database already contains data.
-Create the data needed by each test.
-
-Do not assume return values that are not defined by the implementation or contract.
-Verify deletion by checking the resulting stored data.
-
-Use an isolated temporary database where possible.

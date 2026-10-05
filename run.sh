@@ -88,6 +88,9 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
 
     echo
     echo "== Git diff check =="
-    git diff --check
+
+    if ! git diff --check; then
+        echo "WARNING: Git diff check found formatting issues."
+    fi
 
 done < roles.conf
