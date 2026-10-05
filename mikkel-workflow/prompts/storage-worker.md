@@ -23,3 +23,8 @@ Ensure SQLite rows are converted correctly to dictionaries.
 
 get_conn() must configure the SQLite connection with sqlite3.Row as its row_factory,
 so list_notes() can return dictionaries containing id, title, and content.
+
+Output only the complete contents of the target file.
+Do not output a filename.
+Do not use Markdown fences.
+Do not include explanations.

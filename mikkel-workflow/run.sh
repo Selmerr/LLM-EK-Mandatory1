@@ -425,17 +425,7 @@ while IFS='|' read -r role endpoint model files read_files \
                 "$model"
             ;;
 
-        deployment)
-            run_direct_file \
-                "$endpoint" \
-                "$model" \
-                "$files" \
-                "$WORKFLOW_DIR/prompts/$role.md" \
-                "$read_files" \
-                true
-            ;;
-
-        documentation)
+        api-worker|storage-worker|storage-test|api-test|deployment|documentation)
             run_direct_file \
                 "$endpoint" \
                 "$model" \

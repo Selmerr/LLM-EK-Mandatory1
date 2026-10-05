@@ -25,3 +25,8 @@ Do not create a separate SQLite connection that the production functions do not 
 
 When testing deletion, use the ID returned by create_note().
 Do not hard-code IDs.
+
+Output only the complete contents of the target file.
+Do not output a filename.
+Do not use Markdown fences.
+Do not include explanations.

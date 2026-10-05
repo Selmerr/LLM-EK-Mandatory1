@@ -34,3 +34,8 @@ For DELETE tests:
 
 For 400 and 404 cases, verify the HTTP status code only.
 Do not assume the error response is JSON unless mikkel-workflow/docs/openapi.yaml explicitly requires it.
+
+Output only the complete contents of the target file.
+Do not output a filename.
+Do not use Markdown fences.
+Do not include explanations.

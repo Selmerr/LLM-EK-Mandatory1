@@ -20,3 +20,8 @@ Only modify:
 - mikkel-workflow/src/llm_man_1/api.py
 
 Do not modify storage files, tests, or documentation.
+
+Output only the complete contents of the target file.
+Do not output a filename.
+Do not use Markdown fences.
+Do not include explanations.
