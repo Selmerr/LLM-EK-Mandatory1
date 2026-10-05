@@ -2,21 +2,37 @@
 set -euo pipefail
 
 
-# Always run relative to the directory containing this script.
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+WORKFLOW_DIR="mikkel-workflow"
 
 
-# Only require THIS workflow folder to be clean.
-if [[ -n "$(git status --porcelain -- .)" ]]; then
+if [[ -n "$(git status --porcelain -- "$WORKFLOW_DIR")" ]]; then
     echo "ERROR: Working tree for this workflow is not clean."
-    git status --short -- .
+    git status --short -- "$WORKFLOW_DIR"
     exit 1
 fi
 
 
-mkdir -p artifacts
+mkdir -p "$WORKFLOW_DIR/artifacts"
 
+prefix_paths() {
+    local paths="${1:-}"
+    local path
+    local -a result=()
+
+    for path in $paths; do
+        if [[ "$path" == "$WORKFLOW_DIR/"* ]]; then
+            result+=("$path")
+        else
+            result+=("$WORKFLOW_DIR/$path")
+        fi
+    done
+
+    printf '%s' "${result[*]}"
+}
 
 run_aider() {
     local role="$1"
@@ -35,13 +51,19 @@ run_aider() {
 
     extra_args+=(--map-tokens 0)
 
-    OLLAMA_API_BASE="$endpoint" aider \
-        --model "ollama_chat/$model" \
-        --message-file "$message_file" \
-        --no-git \
-        "${extra_args[@]}" \
-        "${read_args[@]}" \
-        $files < /dev/null
+OLLAMA_API_BASE="$endpoint" aider \
+    --model "ollama_chat/$model" \
+    --message-file "$message_file" \
+    --no-auto-commits \
+    --no-dirty-commits \
+    --no-gitignore \
+    --aiderignore "$WORKFLOW_DIR/.aiderignore" \
+    --model-settings-file "$WORKFLOW_DIR/.aider.model.settings.yml" \
+    --input-history-file "$WORKFLOW_DIR/.aider.input.history" \
+    --chat-history-file "$WORKFLOW_DIR/.aider.chat.history.md" \
+    "${extra_args[@]}" \
+    "${read_args[@]}" \
+    $files < /dev/null
 }
 
 
@@ -60,8 +82,8 @@ from pathlib import Path
 endpoint = os.environ["QUALITY_ENDPOINT"]
 model = os.environ["QUALITY_MODEL"]
 
-prompt = Path("prompts/quality.md").read_text(encoding="utf-8")
-pytest_output = Path("artifacts/pytest.txt").read_text(encoding="utf-8")
+prompt = Path("mikkel-workflow/prompts/quality.md").read_text(encoding="utf-8")
+pytest_output = Path("mikkel-workflow/artifacts/pytest.txt").read_text(encoding="utf-8")
 
 payload = {
     "model": model,
@@ -92,7 +114,7 @@ report = result["message"]["content"].strip()
 if not report:
     raise RuntimeError("Quality model returned an empty report")
 
-Path("docs/quality.md").write_text(
+Path("mikkel-workflow/docs/quality.md").write_text(
     report + "\n",
     encoding="utf-8",
 )
@@ -211,7 +233,7 @@ validate_deployment() {
 
     docker rm -f "$container" >/dev/null 2>&1 || true
 
-    docker build -t "$image" . || return 1
+    docker build -t "$image" "$WORKFLOW_DIR" || return 1
 
     docker run -d \
         --name "$container" \
@@ -328,15 +350,15 @@ approve_stage() {
     if [[ -n "$previous_stage" ]]; then
         echo
 
-        if [[ -z "$(git status --porcelain -- .)" ]]; then
+        if [[ -z "$(git status --porcelain -- "$WORKFLOW_DIR")" ]]; then
             echo "No uncommitted changes to review."
         else
             echo "== Current uncommitted changes =="
 
-            git status --short -- .
+            git status --short -- "$WORKFLOW_DIR"
 
             echo
-            git --no-pager diff -- .
+            git --no-pager diff -- "$WORKFLOW_DIR"
 
             while IFS= read -r f; do
                 git --no-pager diff \
@@ -347,7 +369,7 @@ approve_stage() {
                 git ls-files \
                     --others \
                     --exclude-standard \
-                    -- .
+                    -- "$WORKFLOW_DIR"
             )
         fi
 
@@ -375,6 +397,9 @@ while IFS='|' read -r role endpoint model files read_files \
     || [[ -n "$role" ]]; do
 
     [[ -z "$role" || "$role" == \#* ]] && continue
+
+    files="$(prefix_paths "$files")"
+    read_files="$(prefix_paths "$read_files")"
 
     current_stage="$(stage_for_role "$role")"
 
@@ -405,7 +430,7 @@ while IFS='|' read -r role endpoint model files read_files \
                 "$endpoint" \
                 "$model" \
                 "$files" \
-                "prompts/$role.md" \
+                "$WORKFLOW_DIR/prompts/$role.md" \
                 "$read_files" \
                 true
             ;;
@@ -415,7 +440,7 @@ while IFS='|' read -r role endpoint model files read_files \
                 "$endpoint" \
                 "$model" \
                 "$files" \
-                "prompts/$role.md" \
+                "$WORKFLOW_DIR/prompts/$role.md" \
                 "$read_files" \
                 true
             ;;
@@ -426,7 +451,7 @@ while IFS='|' read -r role endpoint model files read_files \
                 "$endpoint" \
                 "$model" \
                 "$files" \
-                "prompts/$role.md" \
+                "$WORKFLOW_DIR/prompts/$role.md" \
                 "$read_files"
             ;;
     esac
@@ -436,9 +461,10 @@ while IFS='|' read -r role endpoint model files read_files \
         echo
         echo "== Validating OpenAPI spec =="
 
-        if uv run openapi-spec-validator \
-            docs/openapi.yaml \
-            2>&1 | tee artifacts/openapi.txt; then
+        if (
+            cd "$WORKFLOW_DIR"
+            uv run openapi-spec-validator docs/openapi.yaml
+        ) 2>&1 | tee "$WORKFLOW_DIR/artifacts/openapi.txt"; then
 
             echo "OpenAPI validation PASSED."
         else
@@ -454,8 +480,10 @@ while IFS='|' read -r role endpoint model files read_files \
 
         set +e
 
-        uv run pytest \
-            2>&1 | tee artifacts/pytest.txt
+        (
+            cd "$WORKFLOW_DIR"
+            uv run pytest
+        ) 2>&1 | tee "$WORKFLOW_DIR/artifacts/pytest.txt"
 
         pytest_status=${PIPESTATUS[0]}
 
@@ -477,7 +505,7 @@ while IFS='|' read -r role endpoint model files read_files \
         set +e
 
         validate_deployment \
-            2>&1 | tee artifacts/deployment.txt
+            2>&1 | tee "$WORKFLOW_DIR/artifacts/deployment.txt"
 
         deployment_status=${PIPESTATUS[0]}
 
@@ -486,7 +514,7 @@ while IFS='|' read -r role endpoint model files read_files \
         if [[ $deployment_status -eq 0 ]]; then
             echo "Deployment validation PASSED."
 
-            cat > artifacts/deployment-summary.txt <<'EOF'
+            cat > "$WORKFLOW_DIR/artifacts/deployment-summary.txt" <<'EOF'
 Deployment validation: PASSED
 Docker image built successfully.
 Container started successfully.
@@ -501,8 +529,8 @@ EOF
                 echo "Deployment validation: FAILED"
                 echo
                 echo "Last validation output:"
-                tail -n 10 artifacts/deployment.txt
-            } > artifacts/deployment-summary.txt
+                tail -n 10 "$WORKFLOW_DIR/artifacts/deployment.txt"
+            } > "$WORKFLOW_DIR/artifacts/deployment-summary.txt"
         fi
     fi
 
@@ -516,7 +544,7 @@ EOF
         fi
     done
 
-    git status --short -- .
+    git status --short -- "$WORKFLOW_DIR"
 
     echo
     echo "== Git diff =="
@@ -540,9 +568,9 @@ EOF
     echo
     echo "== Git diff check =="
 
-    if ! git --no-pager diff --check -- .; then
+    if ! git --no-pager diff --check -- "$WORKFLOW_DIR"; then
         echo \
             "WARNING: Git diff check found formatting issues."
     fi
 
-done < roles.conf
+done < "$WORKFLOW_DIR/roles.conf"
