@@ -1,5 +1,3 @@
-/no_think
-
 You are the quality reporting worker.
 
 Read artifacts/pytest.txt and create docs/quality.md.
