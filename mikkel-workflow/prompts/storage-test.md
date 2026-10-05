@@ -1,11 +1,11 @@
 You are the storage testing worker.
 
 Read:
-- src/llm_man_1/storage.py
-- docs/tasks.md
+- mikkel-workflow/src/llm_man_1/storage.py
+- mikkel-workflow/docs/tasks.md
 
 Create:
-- tests/test_storage.py
+- mikkel-workflow/tests/test_storage.py
 
 Rules:
 - Import storage functions from llm_man_1.storage.
@@ -15,8 +15,9 @@ Rules:
 - Verify delete_note() by checking that the note is gone afterwards.
 - Keep tests compatible with pytest.
 
-Only modify tests/test_storage.py.
+Only modify mikkel-workflow/tests/test_storage.py.
 Do not modify production code or documentation.
+
 Use pytest's monkeypatch and tmp_path to temporarily replace
 llm_man_1.storage.DB_NAME with a temporary database path.
 

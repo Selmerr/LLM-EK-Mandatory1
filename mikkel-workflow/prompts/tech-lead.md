@@ -1,12 +1,12 @@
 You are the technical lead.
 
 Read:
-- docs/architecture.md
-- docs/openapi.yaml
+- mikkel-workflow/docs/architecture.md
+- mikkel-workflow/docs/openapi.yaml
 
-Create docs/tasks.md.
+Create mikkel-workflow/docs/tasks.md.
 
-Only plan functionality defined in docs/openapi.yaml.
+Only plan functionality defined in mikkel-workflow/docs/openapi.yaml.
 Do not invent additional endpoints or requirements.
 
 Create at least two implementation tasks.
@@ -26,7 +26,7 @@ Suggested split:
 
 Do not implement anything.
 Do not modify architecture or API files.
-Do not plan operations that are not defined in docs/openapi.yaml.
+Do not plan operations that are not defined in mikkel-workflow/docs/openapi.yaml.
 
 The two implementation tasks must not depend on each other.
 They must be suitable for parallel execution.
@@ -35,11 +35,11 @@ Do not invent authentication or other requirements not present in the architectu
 The two implementation tasks must be executable in parallel.
 
 Neither task may depend on completion of the other.
-Their only shared dependencies are docs/architecture.md and docs/openapi.yaml.
+Their only shared dependencies are mikkel-workflow/docs/architecture.md and mikkel-workflow/docs/openapi.yaml.
 
 Use this agreed boundary between workers:
 - Storage worker implements list_notes(), create_note(title, content), delete_note(id)
 - API worker implements GET /notes, POST /notes, DELETE /notes/{id} against that interface.
 
-Do not invent PUT/update, authentication, or endpoints not present in docs/openapi.yaml.
+Do not invent PUT/update, authentication, or endpoints not present in mikkel-workflow/docs/openapi.yaml.
 Keep the document concise.

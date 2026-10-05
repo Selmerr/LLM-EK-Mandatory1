@@ -1,4 +1,4 @@
-Write docs/openapi.yaml as a valid OpenAPI 3.0 specification.
+Write mikkel-workflow/docs/openapi.yaml as a valid OpenAPI 3.0 specification.
 
 Required endpoints:
 - GET /notes
@@ -12,5 +12,5 @@ Rules:
 - POST must use requestBody, not an OpenAPI 2 "in: body" parameter.
 - Do not duplicate YAML keys.
 - Include appropriate response codes.
-- Output only docs/openapi.yaml.
+- Output only mikkel-workflow/docs/openapi.yaml.
 - Keep it under 80 lines.
