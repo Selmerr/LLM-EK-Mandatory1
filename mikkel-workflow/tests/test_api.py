@@ -1,52 +1,56 @@
 import pytest
 from flask import json
 
-# Mock the Flask test client for testing purposes
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def client():
-    from llm_man_1.api import app
+    app = Flask(__name__)
+    app.config['TESTING'] = True
+    from mikkel_workflow.src.llm_man_1.api import create_app
+    app = create_app()
     with app.test_client() as client:
         yield client
 
 def test_get_notes(client):
-    # Test GET /notes returns a list of notes (empty list is valid)
     response = client.get('/notes')
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert isinstance(data, list)  # Ensure it's a JSON array
+    notes = json.loads(response.data)
+    # Empty list is valid, so just ensure JSON is returned
+    assert isinstance(notes, list)
 
-def test_post_note(client):
+def test_create_note_valid(client):
     payload = {
         "title": "Test Note",
         "content": "This is a test note."
     }
     response = client.post('/notes', json=payload)
     assert response.status_code == 201
-    data = json.loads(response.data)
-    # Ensure the response contains an id field for the created note
-    assert 'id' in data
+    created_note = json.loads(response.data)
+    # Ensure ID was captured correctly
+    assert 'id' in created_note
 
-def test_delete_note(client):
+def test_create_note_missing_fields(client):
+    payload = {
+        "content": "This is a test note."
+    }
+    response = client.post('/notes', json=payload)
+    assert response.status_code == 400
+    error_msg = json.loads(response.data).get('error')
+    assert error_msg == 'Title and content are required'
+
+def test_delete_note_existing(client):
     # Create a note first
     payload = {
         "title": "Delete Me",
-        "content": "A note to be deleted."
+        "content": "Content for deletion."
     }
     create_response = client.post('/notes', json=payload)
-    assert create_response.status_code == 201
-    created_data = json.loads(create_response.data)
-    note_id = created_data['id']
-
-    # Now delete the note by ID
-    response = client.delete(f'/notes/{note_id}')
+    created_id = json.loads(create_response.data).get('id')
+    
+    # Now delete it
+    response = client.delete(f'/notes/{created_id}')
     assert response.status_code == 204
 
-def test_post_missing_fields(client):
-    payload = {}  # Missing title and content fields
-    response = client.post('/notes', json=payload)
-    assert response.status_code in (400, 422)  # Expect a bad request or validation error
-
-def test_delete_nonexistent_note(client):
-    note_id = 999  # Arbitrary non-existent ID
-    response = client.delete(f'/notes/{note_id}')
-    assert response.status_code == 404  # Note not found
+def test_delete_note_nonexistent(client):
+    # Try deleting an ID that doesn't exist
+    response = client.delete('/notes/999')
+    assert response.status_code == 404

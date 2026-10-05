@@ -1,47 +1,28 @@
 import sqlite3
 
-DB_NAME = 'notes.db'
-
 def get_conn():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    # Create table if it doesn't exist (run once on startup)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL
-        )
-    ''')
-    # Configure row_factory to sqlite3.Row for dictionary access
-    conn.row_factory = sqlite3.Row
+    conn = sqlite3.connect('notes.db', detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = sqlite3.Row  # Configure to return rows as dictionaries
     return conn
 
 def list_notes():
     conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM notes")
-    rows = cursor.fetchall()
-    # Convert sqlite3.Row objects to dicts containing id, title, and content
-    notes = [dict(row) for row in rows]
-    conn.close()
+    cursor = conn.execute('SELECT id, title, content FROM notes')
+    notes = [dict(row) for row in cursor.fetchall()]
     return notes
 
 def create_note(title, content):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO notes (title, content) VALUES (?, ?)", (title, content))
-    new_id = cursor.lastrowid
+    cursor.execute('INSERT INTO notes (title, content) VALUES (?, ?)', (title, content))
     conn.commit()
-    conn.close()
-    return {"id": new_id}
+    new_id = cursor.lastrowid
+    return {'id': new_id, 'title': title, 'content': content}
 
-def delete_note(note_id):
+def delete_note(id):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM notes WHERE id=?", (note_id,))
-    rows_affected = cursor.rowcount
-    if rows_affected == 0:
-        raise ValueError(f"No note found with ID {note_id}")
+    cursor.execute('DELETE FROM notes WHERE id = ?', (id,))
+    if cursor.rowcount == 0:
+        raise ValueError("Note with the specified ID does not exist.")
     conn.commit()
-    conn.close()

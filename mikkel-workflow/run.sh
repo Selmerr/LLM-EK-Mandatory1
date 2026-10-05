@@ -472,7 +472,7 @@ while IFS='|' read -r role endpoint model files read_files \
 
         (
             cd "$WORKFLOW_DIR"
-            uv run pytest
+            uv run python -m pytest
         ) 2>&1 | tee "$WORKFLOW_DIR/artifacts/pytest.txt"
 
         pytest_status=${PIPESTATUS[0]}

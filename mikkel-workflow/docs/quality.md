@@ -1,17 +1,19 @@
 # Quality Report
 
 ## Test Results
-- total tests: 8
-- passed tests: 5
-- failed tests: 3
+- total tests: 0
+- passed tests: 0
+- failed tests: 2
 - failed test names:
-    - `tests.test_storage.TestStorage::test_list_notes_empty`
-    - `tests.test_storage.TestStorage::test_create_note`
-    - `tests.test_storage.TestStorage::test_delete_note`
+    - tests/test_api.py::test_function
+    - tests/test_storage.py::test_function
+- concise cause of failures: 
+    - ImportError due to missing module 'flask' in `tests/test_api.py`
+    - ImportError due to missing module 'mikkel_workflow' in `tests/test_storage.py`
 
 ## Static Validation
 - The OpenAPI specification is validated separately by the workflow.
 - No additional Python lint or type checking is configured.
 
 ## Known Limitations and Risks
-Tests call production functions using an incompatible interface, indicating a test/implementation interface mismatch. This could lead to tests failing in environments where the actual implementation differs from what was tested.
+- Tests call production functions using an incompatible interface, indicating a potential test/implementation interface mismatch.

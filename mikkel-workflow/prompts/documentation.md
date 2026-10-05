@@ -20,7 +20,7 @@ Local setup command:
 uv sync
 
 Local run command:
-uv run flask --app llm_man_1.api:app run
+uv run python -m flask --app llm_man_1.api:app run
 
 Test command:
 uv run pytest
