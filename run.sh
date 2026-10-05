@@ -41,6 +41,56 @@ run_aider() {
         $files < /dev/null
 }
 
+run_quality() {
+    local endpoint="$1"
+    local model="$2"
+
+    QUALITY_ENDPOINT="$endpoint" QUALITY_MODEL="$model" python3 <<'PY'
+import json
+import os
+import urllib.request
+from pathlib import Path
+
+endpoint = os.environ["QUALITY_ENDPOINT"]
+model = os.environ["QUALITY_MODEL"]
+
+prompt = Path("prompts/quality.md").read_text()
+pytest_output = Path("artifacts/pytest.txt").read_text()
+
+payload = {
+    "model": model,
+    "messages": [
+        {
+            "role": "user",
+            "content": f"{prompt}\n\nPYTEST OUTPUT:\n{pytest_output}"
+        }
+    ],
+    "stream": False,
+    "options": {
+        "temperature": 0
+    }
+}
+
+request = urllib.request.Request(
+    f"{endpoint}/api/chat",
+    data=json.dumps(payload).encode("utf-8"),
+    headers={"Content-Type": "application/json"},
+)
+
+with urllib.request.urlopen(request) as response:
+    result = json.load(response)
+
+report = result["message"]["content"].strip()
+
+if not report:
+    raise RuntimeError("Quality model returned an empty report")
+
+Path("docs/quality.md").write_text(report + "\n", encoding="utf-8")
+
+print(report)
+PY
+}
+
 while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; do
     [[ -z "$role" || "$role" == \#* ]] && continue
 
@@ -53,6 +103,9 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
     echo "Read:     $read_files"
     echo "========================================"
 
+if [[ "$role" == "quality" ]]; then
+    run_quality "$endpoint" "$model"
+else
     run_aider \
         "$role" \
         "$endpoint" \
@@ -60,6 +113,7 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
         "$files" \
         "prompts/$role.md" \
         "$read_files"
+fi
 
     if [[ "$role" == "api-test" ]]; then
         echo

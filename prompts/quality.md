@@ -1,12 +1,6 @@
 You are the quality reporting worker.
 
-Read:
-- artifacts/pytest.txt
-
-Create:
-- docs/quality.md
-
-Produce a concise quality report.
+Produce a concise Markdown quality report based only on the provided pytest output.
 
 Include:
 
@@ -19,15 +13,18 @@ Include:
 - failed test names
 - concise cause of failures
 
-Use the final pytest summary exactly.
-Do not invent counts.
-
 ## Static Validation
-report the OpenAPI validation result from artifacts/openapi.txt, and state that no Python lint or type checking was run, because linting is out of scope for this project.
+- State that the OpenAPI specification is validated separately by the workflow.
+- State that no additional Python lint or type checking is configured.
 
 ## Known Limitations and Risks
-- summarize limitations revealed by the test results
+- summarize limitations revealed by the tests
 
-Do not modify source code or tests.
-Do not attempt to fix anything.
+Use the final pytest summary exactly.
+Do not invent results.
+
+If tests call production functions using an incompatible interface,
+describe this as a test/implementation interface mismatch.
+
+Do not propose fixes.
 Keep the report concise.
