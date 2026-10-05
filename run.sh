@@ -22,7 +22,10 @@ run_aider() {
         read_args+=(--read "$f")
     done
 
-    if [[ "$role" == "tech-lead" || "$role" == "storage-test" || "$role" == "api-test" ]]; then
+    if [[ "$role" == "tech-lead" ||
+        "$role" == "storage-worker" ||
+        "$role" == "storage-test" ||
+        "$role" == "api-test" ]]; then
         extra_args+=(--map-tokens 0)
     fi
 
