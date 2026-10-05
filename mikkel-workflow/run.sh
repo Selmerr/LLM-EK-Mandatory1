@@ -43,6 +43,7 @@ run_aider() {
     OLLAMA_API_BASE="$endpoint" aider \
         --model "ollama_chat/$model" \
         --message-file "$message_file" \
+        --no-gitignore \
         --no-auto-commits \
         --subtree-only \
         "${extra_args[@]}" \
