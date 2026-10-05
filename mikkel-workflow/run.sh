@@ -463,7 +463,7 @@ while IFS='|' read -r role endpoint model files read_files \
 
         if (
             cd "$WORKFLOW_DIR"
-            uv run openapi-spec-validator docs/openapi.yaml
+            uv run python -m openapi_spec_validator docs/openapi.yaml
         ) 2>&1 | tee "$WORKFLOW_DIR/artifacts/openapi.txt"; then
 
             echo "OpenAPI validation PASSED."
