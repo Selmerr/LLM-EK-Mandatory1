@@ -1,0 +1,3 @@
+## Ticket T1: Set up MongoDB for Meal Ticket Data; Assigned worker: implementer_a; Scope: Install and configure MongoDB to store meal ticket data; Files: `demo_repo/db/mongo-init.js`, `demo_repo/docker-compose.yml`; Acceptance criteria: MongoDB is running and accessible via Docker, sample meal ticket data can be inserted and retrieved; Dependencies: none.
+
+## Ticket T2: Create RESTful API for Meal Tickets; Assigned worker: implementer_b; Scope: Develop a RESTful API to handle CRUD operations for meal tickets; Files: `demo_repo/backend/controllers/ticketController.js`, `demo_repo/backend/routes/ticketRoutes.js`; Acceptance criteria: The API can create, read, update, and delete meal ticket data as specified in the interface contracts; Dependencies: T1.

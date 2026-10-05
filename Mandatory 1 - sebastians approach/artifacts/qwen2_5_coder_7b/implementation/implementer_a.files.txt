@@ -1,0 +1,25 @@
+BEGIN_FILE demo_repo/db/mongo-init.js
+db.createCollection("tickets")
+db.tickets.insertMany([
+  {
+    "name": "Meal Ticket",
+    "description": "A meal ticket for a specific event.",
+    "price": 10.99,
+    "quantity": 50,
+    "createdAt": new Date(),
+    "updatedAt": new Date()
+  }
+])
+END_FILE
+
+BEGIN_FILE demo_repo/docker-compose.yml
+version: '3'
+services:
+  db:
+    image: mongo:latest
+    container_name: meal_ticket_db
+    volumes:
+      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    ports:
+      - "27017:27017"
+END_FILE

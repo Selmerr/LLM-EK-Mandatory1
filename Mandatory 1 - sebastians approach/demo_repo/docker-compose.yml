@@ -1,0 +1,15 @@
+version: '3'
+services:
+  db:
+    image: mongo:latest
+    container_name: meal_ticket_db
+    volumes:
+      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    ports:
+      - "27017:27017"
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db

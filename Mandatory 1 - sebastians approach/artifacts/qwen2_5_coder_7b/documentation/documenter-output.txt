@@ -1,0 +1,139 @@
+BEGIN_FILE demo_repo/README.md
+# Meal Ticket App
+
+## Overview
+
+The Meal Ticket App is a web-based application for managing meal tickets. It consists of a frontend built with React.js and Redux, a backend built with Node.js and Express.js, and a MongoDB database.
+
+## Setup
+
+1. **Install Dependencies**:
+   ```sh
+   npm install -g create-react-app
+   npx create-react-app client
+   cd client && npm install axios redux react-redux @testing-library/react @testing-library/jest-dom vite
+   cd ..
+   npm install body-parser cors express mongoose
+   ```
+
+2. **Configure Environment Variables**:
+   Copy `.env.example` to `.env` and update the database connection details.
+
+3. **Initialize MongoDB**:
+   ```sh
+   docker-compose up -d db
+   mongo localhost:27017/meal_ticket_db --eval "load('./db/mongo-init.js')"
+   ```
+
+## Running
+
+1. **Start Backend**:
+   ```sh
+   npm start
+   ```
+
+2. **Start Frontend**:
+   ```sh
+   cd client && npm run start
+   ```
+
+3. **Access Application**:
+   Open your browser and navigate to `http://localhost:3000`.
+
+## Testing
+
+1. **Backend Tests**:
+   ```sh
+   npm test --prefix backend
+   ```
+
+2. **Frontend Tests**:
+   ```sh
+   cd client && npm run test
+   ```
+
+## Usage
+
+### CRUD Operations for Meal Tickets
+
+#### Create
+- **Endpoint**: `/api/tickets`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "name": "Meal Ticket",
+    "description": "A meal ticket for a specific event.",
+    "price": 10.99,
+    "quantity": 50
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "_id": "ObjectId('...')",
+    "name": "Meal Ticket",
+    "description": "A meal ticket for a specific event.",
+    "price": 10.99,
+    "quantity": 50,
+    "createdAt": "2023-04-01T12:00:00Z",
+    "updatedAt": "2023-04-01T12:00:00Z"
+  }
+  ```
+
+#### Read
+- **Endpoint**: `/api/tickets`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  [
+    {
+      "_id": "ObjectId('...')",
+      "name": "Meal Ticket",
+      "description": "A meal ticket for a specific event.",
+      "price": 10.99,
+      "quantity": 50,
+      "createdAt": "2023-04-01T12:00:00Z",
+      "updatedAt": "2023-04-01T12:00:00Z"
+    }
+  ]
+  ```
+
+#### Update
+- **Endpoint**: `/api/tickets/:id`
+- **Method**: `PUT`
+- **Request Body**:
+  ```json
+  {
+    "name": "Updated Meal Ticket",
+    "description": "An updated meal ticket for a specific event.",
+    "price": 12.99,
+    "quantity": 40
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "_id": "ObjectId('...')",
+    "name": "Updated Meal Ticket",
+    "description": "An updated meal ticket for a specific event.",
+    "price": 12.99,
+    "quantity": 40,
+    "createdAt": "2023-04-01T12:00:00Z",
+    "updatedAt": "2023-04-01T12:00:00Z"
+  }
+  ```
+
+#### Delete
+- **Endpoint**: `/api/tickets/:id`
+- **Method**: `DELETE`
+- **Response**:
+  ```json
+  {
+    "message": "Ticket deleted successfully."
+  }
+  ```
+END_FILE
+
+COMMAND: docker-compose up -d db
+COMMAND: mongo localhost:27017/meal_ticket_db --eval "load('./db/mongo-init.js')"

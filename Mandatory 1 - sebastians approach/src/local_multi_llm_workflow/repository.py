@@ -46,11 +46,49 @@ class Repository:
                 lines.append(str(path.relative_to(self.root)).replace("\\", "/"))
         return "\n".join(lines) or "(target repository is empty)"
 
+    def snapshot(self, max_files: int = 24, max_chars: int = 20000) -> str:
+        if not self.root.exists():
+            return "(target repository does not exist yet)"
+
+        chunks: list[str] = []
+        remaining = max_chars
+        for path in sorted(self.root.rglob("*")):
+            if len(chunks) >= max_files or remaining <= 0:
+                break
+            if not path.is_file() or _is_ignored(path) or not _is_snapshot_candidate(path):
+                continue
+
+            relative_path = path.relative_to(self.root).as_posix()
+            try:
+                content = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                continue
+
+            header = f"--- {self.root.name}/{relative_path} ---\n"
+            available = remaining - len(header) - len("\n")
+            if available <= 0:
+                break
+            if len(content) > available:
+                content = content[:available].rstrip() + "\n[truncated]"
+            chunk = header + content.strip() + "\n"
+            chunks.append(chunk)
+            remaining -= len(chunk)
+
+        return "\n".join(chunks) if chunks else "(no readable source files found)"
+
     def ensure_root(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def read(self, relative_path: str) -> str:
         return (self.root / relative_path).read_text(encoding="utf-8")
+
+    def missing_or_empty_paths(self, paths: list[str]) -> list[str]:
+        missing: list[str] = []
+        for raw_path in paths:
+            path = self.root.parent / raw_path
+            if not path.is_file() or path.stat().st_size == 0:
+                missing.append(raw_path)
+        return missing
 
     def write(self, relative_path: str, content: str) -> str:
         path = self.root / relative_path
@@ -63,18 +101,28 @@ class Repository:
         return diff
 
     def run(self, command: str) -> CommandResult:
-        if self.ask_before_commands and not _confirm(f"Run command: {command}?"):
+        normalized_command = _command_for_repo_root(command, self.root.name)
+        if self.ask_before_commands and not _confirm(
+            f"Run command in {self.root.name}/: {normalized_command}?"
+        ):
             return CommandResult(command=command, returncode=130, stdout="", stderr="Skipped by user")
+        if not self.root.exists():
+            return CommandResult(
+                command=normalized_command,
+                returncode=2,
+                stdout="",
+                stderr=f"Cannot run command because {self.root.name}/ does not exist.",
+            )
         completed = subprocess.run(
-            command,
-            cwd=self.root.parent,
+            normalized_command,
+            cwd=self.root,
             shell=True,
             text=True,
             capture_output=True,
             check=False,
         )
         return CommandResult(
-            command=command,
+            command=normalized_command,
             returncode=completed.returncode,
             stdout=completed.stdout,
             stderr=completed.stderr,
@@ -154,9 +202,59 @@ def _confirm(question: str) -> bool:
     return answer in {"y", "yes"}
 
 
+def _command_for_repo_root(command: str, root_name: str) -> str:
+    stripped = command.strip()
+    prefixes = [
+        f"cd {root_name} && ",
+        f"cd .\\{root_name} && ",
+        f"cd ./{root_name} && ",
+        f"cd {root_name}; ",
+        f"cd .\\{root_name}; ",
+        f"cd ./{root_name}; ",
+    ]
+    lowered = stripped.lower()
+    for prefix in prefixes:
+        if lowered.startswith(prefix.lower()):
+            return stripped[len(prefix):].strip()
+    return stripped
+
+
 def _is_ignored(path: Path) -> bool:
-    ignored_parts = {".git", "__pycache__", ".pytest_cache", ".venv", "artifacts"}
+    ignored_parts = {
+        ".git",
+        "__pycache__",
+        ".pytest_cache",
+        ".venv",
+        "artifacts",
+        "node_modules",
+        "dist",
+        "build",
+        "coverage",
+    }
     return any(part in ignored_parts for part in path.parts)
+
+
+def _is_snapshot_candidate(path: Path) -> bool:
+    allowed_suffixes = {
+        ".css",
+        ".html",
+        ".js",
+        ".jsx",
+        ".json",
+        ".md",
+        ".mjs",
+        ".py",
+        ".ts",
+        ".tsx",
+        ".yml",
+        ".yaml",
+    }
+    allowed_names = {".env.example", "Dockerfile"}
+    ignored_names = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml"}
+    return (
+        path.name in allowed_names
+        or (path.suffix.lower() in allowed_suffixes and path.name not in ignored_names)
+    )
 
 
 def _looks_like_unified_diff(diff_text: str) -> bool:

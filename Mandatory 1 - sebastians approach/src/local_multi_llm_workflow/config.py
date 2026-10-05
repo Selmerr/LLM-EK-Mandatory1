@@ -33,7 +33,10 @@ class ModelProfileConfig:
 class ControlConfig:
     ask_before_commands: bool
     ask_before_file_edits: bool
-    require_diff_before_apply: bool
+    max_backlog_revision_iterations: int
+    max_implementation_completion_iterations: int
+    max_implementation_verification_iterations: int
+    max_repair_iterations: int
     commit_after_each_stage: bool
 
 
@@ -95,7 +98,14 @@ def load_config(path: str | Path, profile: str | None = None) -> WorkflowConfig:
         controls=ControlConfig(
             ask_before_commands=bool(controls.get("ask_before_commands", True)),
             ask_before_file_edits=bool(controls.get("ask_before_file_edits", True)),
-            require_diff_before_apply=bool(controls.get("require_diff_before_apply", True)),
+            max_backlog_revision_iterations=int(controls.get("max_backlog_revision_iterations", 4)),
+            max_implementation_completion_iterations=int(
+                controls.get("max_implementation_completion_iterations", 1)
+            ),
+            max_implementation_verification_iterations=int(
+                controls.get("max_implementation_verification_iterations", 1)
+            ),
+            max_repair_iterations=int(controls.get("max_repair_iterations", 1)),
             commit_after_each_stage=bool(controls.get("commit_after_each_stage", False)),
         ),
     )

@@ -80,4 +80,6 @@ The workflow will ask the user before applying your generated files.
 If commands should be run after files are written, add them as separate lines:
 COMMAND: command to run
 
+Commands will be run with the working directory already set to {target_root}/.
+Do not prefix commands with cd {target_root}, cd ./{target_root}, or cd .\\{target_root}.
 Return only BEGIN_FILE blocks and optional COMMAND lines."""

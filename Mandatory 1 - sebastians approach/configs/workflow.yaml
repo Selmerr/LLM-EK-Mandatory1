@@ -1,4 +1,4 @@
-goal: create a web based application, that makes use of CRUD operations
+goal: create a web based application, both a frontend and a backend that runs over rest, that makes use of CRUD operations, it needs to support the ordering of meal tickets
 
 project:
   repository_path: demo_repo
@@ -16,6 +16,9 @@ model_profiles:
   qwen2_5_coder_3b:
     endpoint: ollama_primary
     model: qwen2.5-coder:3b
+  qwen2_5_coder_7b:
+    endpoint: ollama_primary
+    model: qwen2.5-coder:7b
   qwen3_4b:
     endpoint: ollama_primary
     model: qwen3:4b
@@ -42,5 +45,8 @@ roles:
 controls:
   ask_before_commands: true
   ask_before_file_edits: true
-  require_diff_before_apply: true
+  max_backlog_revision_iterations: 4
+  max_implementation_completion_iterations: 1
+  max_implementation_verification_iterations: 1
+  max_repair_iterations: 2
   commit_after_each_stage: false

@@ -1,0 +1,80 @@
+BEGIN_FILE demo_repo/package.json
+{
+  "name": "meal-ticket-app",
+  "version": "1.0.0",
+  "description": "A web-based application for managing meal tickets",
+  "scripts": {
+    "start": "docker-compose up --build"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "redux": "^4.1.5",
+    "vite": "^2.6.4"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/jest-dom": "^5.11.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.3.2"
+  }
+}
+END_FILE
+
+BEGIN_FILE demo_repo/backend/package.json
+{
+  "name": "meal-ticket-backend",
+  "version": "1.0.0",
+  "description": "Backend for managing meal tickets",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.3"
+  }
+}
+END_FILE
+
+BEGIN_FILE demo_repo/client/package.json
+{
+  "name": "meal-ticket-client",
+  "version": "1.0.0",
+  "description": "Client for managing meal tickets",
+  "scripts": {
+    "start": "vite"
+  },
+  "dependencies": {
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/jest-dom": "^5.11.9",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "redux": "^4.1.5"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/jest-dom": "^5.11.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.3.2",
+    "vite": "^2.6.4"
+  }
+}
+END_FILE
+
+BEGIN_FILE demo_repo/.env.example
+DB_HOST=localhost
+DB_PORT=27017
+DB_NAME=meal_ticket_db
+PORT=5000
+FRONTEND_URL=http://localhost:3000
+END_FILE
+
+COMMAND: npm install -g create-react-app
+COMMAND: npx create-react-app client
+COMMAND: cd client && npm install axios redux react-redux @testing-library/react @testing-library/jest-dom vite
+COMMAND: cd ..
+COMMAND: npm install body-parser cors express mongoose
+COMMAND: docker-compose up --build

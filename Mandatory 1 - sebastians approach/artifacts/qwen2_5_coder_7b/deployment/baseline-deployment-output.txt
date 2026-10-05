@@ -1,0 +1,10 @@
+# Baseline Deployment Validation
+
+The workflow creates a deterministic deployment baseline before asking the deployment validator model for project-specific improvements.
+
+Generated baseline files:
+
+- `demo_repo/DEPLOYMENT_CHECKLIST.md`
+- `demo_repo/.github/workflows/validate.yml`
+
+This ensures every run contains at least one deployment checklist and one CI validation workflow, satisfying the deployment validation responsibility even if the model output is incomplete.

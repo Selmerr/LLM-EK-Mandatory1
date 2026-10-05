@@ -1,0 +1,42 @@
+name: Validate generated project
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate generated project structure
+        shell: bash
+        run: |
+          test -f README.md || test -f package.json || test -f pyproject.toml
+
+      - name: Install and test Node project
+        if: ${{ hashFiles('package.json') != '' }}
+        shell: bash
+        run: |
+          npm install
+          npm test --if-present
+
+      - name: Install and test Python project
+        if: ${{ hashFiles('pyproject.toml') != '' }}
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+          python -m pytest || python -m unittest discover
