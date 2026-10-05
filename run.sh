@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+
 if [[ -n "$(git status --porcelain)" ]]; then
     echo "ERROR: Working tree is not clean."
     git status --short
     exit 1
 fi
 
+mkdir -p artifacts
 run_aider() {
     local role="$1"
     local endpoint="$2"
@@ -62,7 +64,6 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
     if [[ "$role" == "api-test" ]]; then
         echo
         echo "== Running tests =="
-        mkdir -p artifacts
 
         set +e
         uv run pytest 2>&1 | tee artifacts/pytest.txt
@@ -76,17 +77,18 @@ while IFS='|' read -r role endpoint model files read_files || [[ -n "$role" ]]; 
         fi    
     fi
 
-    if [[ "$role" == "api" ]]; then
-        echo
-        echo "== Validating OpenAPI spec =="
+if [[ "$role" == "api" ]]; then
+echo
+echo "== Validating OpenAPI spec =="
 
-        if uv run openapi-spec-validator docs/openapi.yaml; then
-            echo "OpenAPI validation PASSED."
-        else
-            echo "ERROR: OpenAPI validation failed."
-            exit 1
-        fi
-    fi
+if uv run openapi-spec-validator docs/openapi.yaml 2>&1 | tee artifacts/openapi.txt; then
+echo "OpenAPI validation PASSED."
+else
+echo "ERROR: OpenAPI validation failed."
+exit 1
+fi
+fi
+
 
     echo
     echo "== Result: $role =="
