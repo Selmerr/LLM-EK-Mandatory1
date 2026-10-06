@@ -1,0 +1,45 @@
+You are the technical lead.
+
+Read:
+- mikkel-workflow/docs/architecture.md
+- mikkel-workflow/docs/openapi.yaml
+
+Create mikkel-workflow/docs/tasks.md.
+
+Only plan functionality defined in mikkel-workflow/docs/openapi.yaml.
+Do not invent additional endpoints or requirements.
+
+Create at least two implementation tasks.
+
+Each task must include:
+- task ID
+- scope boundaries
+- dependencies
+- acceptance criteria
+
+Partition the work so that at least two implementation workers can work
+independently.
+
+Suggested split:
+- storage/persistence
+- Flask API/routes
+
+Do not implement anything.
+Do not modify architecture or API files.
+Do not plan operations that are not defined in mikkel-workflow/docs/openapi.yaml.
+
+The two implementation tasks must not depend on each other.
+They must be suitable for parallel execution.
+
+Do not invent authentication or other requirements not present in the architecture or API contract.
+The two implementation tasks must be executable in parallel.
+
+Neither task may depend on completion of the other.
+Their only shared dependencies are mikkel-workflow/docs/architecture.md and mikkel-workflow/docs/openapi.yaml.
+
+Use this agreed boundary between workers:
+- Storage worker implements list_notes(), create_note(title, content), delete_note(id)
+- API worker implements GET /notes, POST /notes, DELETE /notes/{id} against that interface.
+
+Do not invent PUT/update, authentication, or endpoints not present in mikkel-workflow/docs/openapi.yaml.
+Keep the document concise.

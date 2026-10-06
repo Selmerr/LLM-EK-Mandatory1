@@ -1,0 +1,6 @@
+.aider*
+__pycache__/
+docker-compose.yml
+/notes.db
+artifacts/
+notes.db
