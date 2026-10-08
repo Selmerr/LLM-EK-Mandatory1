@@ -1,0 +1,194 @@
+﻿openapi: 3.0.0
+info:
+  title: Task API
+  version: 1.0.0
+
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+
+  /tasks:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - tasks
+                  - total
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskResponse'
+                  total:
+                    type: integer
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Task ID
+        schema:
+          type: string
+
+    get:
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      responses:
+        '204':
+          description: Task deleted
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+
+    TaskCreate:
+      type: object
+      required:
+        - title
+        - status
+        - priority
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        priority:
+          type: integer
+        due_date:
+          type: string
+          format: date-time
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        priority:
+          type: integer
+        due_date:
+          type: string
+          format: date-time
+
+    TaskResponse:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - priority
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        priority:
+          type: integer
+        due_date:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
