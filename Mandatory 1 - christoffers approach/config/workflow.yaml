@@ -1,0 +1,31 @@
+openwebui:
+  base_url: http://localhost:3000
+
+models:
+  primary:
+    model: qwen3:4b
+
+  secondary:
+    model: secondary/qwen3:4b
+
+roles:
+  architect:
+    model: primary
+
+  tech_lead:
+    model: primary
+
+  developer_a:
+    model: secondary
+
+  developer_b:
+    model: secondary
+
+  tester:
+    model: primary
+
+  documentation:
+    model: primary
+
+  deployment:
+    model: secondary
